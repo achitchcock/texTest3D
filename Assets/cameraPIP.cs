@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class cubemove : MonoBehaviour {
-
+public class cameraPIP : MonoBehaviour
+{
     public Button startBtn;
-    public Button moveBtn;
+    public Button Drone_video_btn;
+    public Button Phone_video_btn;
     public Button showToast;
     public Button startDrone;
     public Button takeOffBtn;
@@ -17,6 +18,8 @@ public class cubemove : MonoBehaviour {
     //public Button stopYawBtn;
     public GameObject left_display;
     public GameObject right_display;
+    public GameObject left_pip_display;
+    public GameObject right_pip_display;
     public Text connection_status;
     public Text connected_hardware;
     public Text flight_controller_status;
@@ -26,12 +29,15 @@ public class cubemove : MonoBehaviour {
     private bool update_display_flag;
     private bool frame_ready_flag;
     private bool drone_camera_flag;
+    private bool phone_camera_flag;
 
     // Drone Camera
     private Texture2D tex2d;
 
     // phoneCam Camera
     private WebCamTexture webTex;
+
+    public Texture noVideo;
 
     // Display positions
     private Vector3 defaultPos;
@@ -45,28 +51,27 @@ public class cubemove : MonoBehaviour {
     private ColorBlock off;
 
     // Use this for initialization
-    void Start () {
-        update_display_flag = false;
+    void Start()
+    {
+        update_display_flag = true;
         update_status_flag = false;
         frame_ready_flag = false;
         drone_camera_flag = false;
-        defaultPos = new Vector3(-236,-283,0);
-        defaultScale = new Vector3(926,768,1);
-        viewcale = new Vector3(1270,1050,1);
-        leftView = new Vector3(-640,0,0);
-        rightView = new Vector3(640,0,0);
+        phone_camera_flag = false;
+        defaultPos = new Vector3(-236, -283, 0);
+        defaultScale = new Vector3(926, 768, 1);
+        viewcale = new Vector3(1270, 1050, 1);
+        leftView = new Vector3(-640, 0, 0);
+        rightView = new Vector3(640, 0, 0);
         startBtn.onClick.AddListener(update_status_toggle);
-        moveBtn.onClick.AddListener(update_display_toggle);
+        Drone_video_btn.onClick.AddListener(toggle_drone_cam);
+        Phone_video_btn.onClick.AddListener(toggle_phone_cam);
         startDrone.onClick.AddListener(startDroneFunc);
         showToast.onClick.AddListener(toast);
         takeOffBtn.onClick.AddListener(takeOff);
         landBtn.onClick.AddListener(land);
-        enableCam.onClick.AddListener(swapCam);
-        //startYawBtn.onClick.AddListener(StartYaw);
-        //stopYawBtn.onClick.AddListener(stopYaw);
         lastFrame = Time.time;
-        on = startBtn.colors;
-        moveBtn.colors = on;
+        on = Drone_video_btn.colors;
         off = startBtn.colors;
         off.normalColor = new Color(0.8f, 0f, 0f, 1f);
         off.highlightedColor = new Color(0.8f, 0f, 0f, 1f);
@@ -78,12 +83,11 @@ public class cubemove : MonoBehaviour {
 
     void update_status_toggle()
     {
-        if(update_status_flag)
+        if (update_status_flag)
         {
             update_status_flag = false;
             startBtn.colors = on;
             startBtn.GetComponentInChildren<Text>().text = "START";
-
         }
         else
         {
@@ -92,48 +96,38 @@ public class cubemove : MonoBehaviour {
             startBtn.GetComponentInChildren<Text>().text = "STOP";
         }
     }
-	
-    void update_display_toggle()
-    {
-        if (update_display_flag)
-        {
-            update_display_flag = false;
-            moveBtn.colors = on;
-            left_display.transform.localPosition = defaultPos;
-            right_display.transform.localPosition = defaultPos;
-            left_display.transform.localScale = defaultScale;
-            right_display.transform.localScale = defaultScale;
-        }
-        else
-        {
-            update_display_flag = true;
-            moveBtn.colors = off;
-            left_display.transform.localPosition = leftView;
-            right_display.transform.localPosition = rightView;
-            left_display.transform.localScale = viewcale;
-            right_display.transform.localScale = viewcale;
-        }
-    }
 
-    void swapCam()
+    void toggle_drone_cam()
     {
-        if(drone_camera_flag == true)
+        if (drone_camera_flag)
         {
             drone_camera_flag = false;
-            webTex.Play();
-            enableCam.colors = off;
+            Drone_video_btn.colors = off;
         }
         else
         {
             drone_camera_flag = true;
-            webTex.Stop();
-            enableCam.colors = on;
+            Drone_video_btn.colors = on;
+        }
+    }
+
+    void toggle_phone_cam()
+    {
+        if (phone_camera_flag)
+        {
+            phone_camera_flag = false;
+            Phone_video_btn.colors = on;
+        }
+        else
+        {
+            phone_camera_flag = true;
+            Phone_video_btn.colors = off;
         }
     }
 
     void set_frame_ready(string message)
     {
-        if(message == "true")
+        if (message == "true")
         {
             frame_ready_flag = true;
         }
@@ -178,7 +172,7 @@ public class cubemove : MonoBehaviour {
 
     void updateDisplay()
     {
-        if (drone_camera_flag == true)
+        if (drone_camera_flag )
         {
             if (frame_ready_flag)
             {
@@ -195,7 +189,7 @@ public class cubemove : MonoBehaviour {
                             tex2d.Apply();
                             left_display.GetComponent<Renderer>().material.mainTexture = tex2d;
                             right_display.GetComponent<Renderer>().material.mainTexture = tex2d;
-                            fps_display.text = ""+ Math.Round(1/(Time.time - lastFrame),2) + "fps";
+                            fps_display.text = "" + Math.Round(1 / (Time.time - lastFrame), 2) + "fps";
                             lastFrame = Time.time;
                         }
 
@@ -205,9 +199,20 @@ public class cubemove : MonoBehaviour {
         }
         else
         {
-            if(webTex.isPlaying == false) { webTex.Play(); }
-            left_display.GetComponent<Renderer>().material.mainTexture = webTex;
-            right_display.GetComponent<Renderer>().material.mainTexture = webTex;
+            left_display.GetComponent<Renderer>().material.mainTexture = noVideo;
+            right_display.GetComponent<Renderer>().material.mainTexture = noVideo;
+        }
+        if ( phone_camera_flag )
+        {
+            if (webTex.isPlaying == false) { webTex.Play(); }
+            left_pip_display.GetComponent<Renderer>().material.mainTexture = webTex;
+            right_pip_display.GetComponent<Renderer>().material.mainTexture = webTex;
+        }
+        else
+        {
+            webTex.Stop();
+            left_pip_display.GetComponent<Renderer>().material.mainTexture = noVideo;
+            right_pip_display.GetComponent<Renderer>().material.mainTexture = noVideo;
         }
     }
 
@@ -258,8 +263,9 @@ public class cubemove : MonoBehaviour {
 
 
 
-	// Update is called once per frame
-	void Update () {
+    // Update is called once per frame
+    void Update()
+    {
         if (update_status_flag)
         {
             updateText();
@@ -268,5 +274,5 @@ public class cubemove : MonoBehaviour {
         {
             updateDisplay();
         }
-	}
+    }
 }
