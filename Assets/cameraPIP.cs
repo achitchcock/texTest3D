@@ -14,6 +14,32 @@ public class cameraPIP : MonoBehaviour
     public Button takeOffBtn;
     public Button landBtn;
     public Button enableCam;
+    public Button enableVirtualControl;
+    public Button yawRight;
+    public Button stopControl;
+
+    // flight controll values
+    public Button yawPlus;
+    public Button yawMinus;
+    public Text yawValue;
+    public float yaw;
+
+    public Button rollPlus;
+    public Button rollMinus;
+    public Text rollValue;
+    public float roll;
+
+    public Button pitchPlus;
+    public Button pitchMinus;
+    public Text pitchValue;
+    public float pitch;
+
+    public Button throttlePlus;
+    public Button throttleMinus;
+    public Text throttleValue;
+    public float throttle;
+
+
     //public Button startYawBtn;
     //public Button stopYawBtn;
     public GameObject left_display;
@@ -70,6 +96,26 @@ public class cameraPIP : MonoBehaviour
         showToast.onClick.AddListener(toast);
         takeOffBtn.onClick.AddListener(takeOff);
         landBtn.onClick.AddListener(land);
+        enableVirtualControl.onClick.AddListener(enableVirtualSticks);
+        yawRight.onClick.AddListener(StartYaw);
+        stopControl.onClick.AddListener(stopYaw);
+        
+
+        // flight controll values
+        yaw = 0;
+        pitch = 0;
+        roll = 0;
+        throttle = 0;
+        yawPlus.onClick.AddListener(yawUp);
+        yawMinus.onClick.AddListener(yawDown);
+        rollPlus.onClick.AddListener(rollUp);
+        rollMinus.onClick.AddListener(rollDown);
+        pitchPlus.onClick.AddListener(pitchUp);
+        pitchMinus.onClick.AddListener(pitchDown);
+        throttlePlus.onClick.AddListener(throttleUp);
+        throttleMinus.onClick.AddListener(throttleDown);
+
+        //#######################
         lastFrame = Time.time;
         on = Drone_video_btn.colors;
         off = startBtn.colors;
@@ -252,14 +298,97 @@ public class cameraPIP : MonoBehaviour
 
     void stopYaw()
     {
+        callVoidDroneFunc("stopYaw");    
+    }
+
+    void enableVirtualSticks()
+    {
         using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
         {
             using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
             {
-                obj_Activity.Call("stopYaw");
+                obj_Activity.Call("setVirtualControlActive", new object[] { true });
             }
         }
     }
+
+    // helper function to reduce code length
+    void callVoidDroneFunc(String funcName)
+    {
+        using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+        {
+            using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+            {
+                obj_Activity.Call(funcName);
+            }
+        }
+    }
+
+    // helper function to reduce code length
+    void callVoidDroneFunction(String funcName, object[] args)
+    {
+        using (AndroidJavaClass cls_UnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+        {
+            using (AndroidJavaObject obj_Activity = cls_UnityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+            {
+                obj_Activity.Call(funcName, args);
+            }
+        }
+    }
+
+    void yawUp()
+    {
+        yaw += 1;
+        yawValue.text = yaw.ToString();
+        callVoidDroneFunction("setYaw", new object[] { yaw });
+    }
+    void yawDown()
+    {
+        yaw -= 1;
+        yawValue.text = yaw.ToString();
+        callVoidDroneFunction("setYaw", new object[] { yaw });
+    }
+
+
+    void rollUp()
+    {
+        roll += 1;
+        rollValue.text = roll.ToString();
+        callVoidDroneFunction("setRoll", new object[] { roll });
+    }
+    void rollDown()
+    {
+        roll -= 1;
+        rollValue.text = roll.ToString();
+        callVoidDroneFunction("setRoll", new object[] { roll });
+    }
+
+    void pitchUp()
+    {
+        pitch += 1;
+        pitchValue.text = pitch.ToString();
+        callVoidDroneFunction("setPitch", new object[] { pitch });
+    }
+    void pitchDown()
+    {
+        pitch -= 1;
+        pitchValue.text = pitch.ToString();
+        callVoidDroneFunction("setPitch", new object[] { pitch });
+    }
+
+    void throttleUp()
+    {
+        throttle += 1;
+        throttleValue.text = throttle.ToString();
+        callVoidDroneFunction("setpitch", new object[] { throttle });
+    }
+    void throttleDown()
+    {
+        throttle -= 1;
+        throttleValue.text = throttle.ToString();
+        callVoidDroneFunction("setpitch", new object[] { throttle });
+    }
+
 
 
 

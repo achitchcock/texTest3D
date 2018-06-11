@@ -79,6 +79,7 @@
     <Compile Include="Assets\cameraPIP.cs" />
     <Compile Include="Assets\cameraSwap.cs" />
     <Compile Include="Assets\phoneCam.cs" />
+    <Compile Include="Assets\show_hide_controls.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
